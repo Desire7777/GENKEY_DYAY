@@ -6,36 +6,26 @@
 
 
 #Variables
-BACKUP_DIR="/backups"
-SOURCE_DIR="/home/user/data"
-LOG_FILE="/var/log/audit.log"
+BACKUP_DIR="/home/desire/backups"
+SOURCE_DIR="/home/desire/backup-data"
+LOG_FILE="/home/desire/audit.log"
 DATE="$(date +%Y%m%d)"
 SCRIPT_PATH="$(realpath "$0")"
 CRON_JOB="0 3 * * * $SCRIPT_PATH"
 
 log(){
         echo "[$(date '+%Y-%m-%d')] $1" >> $LOG_FILE
-        }
+}
 
-if [ "$1" == "--install-cron" ]; then
-    if ! crontab -l 2>/dev/null | grep -F $SCRIPT_PATH >/dev/null; then
-        (crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
-        log"Cronjob Installed : $CRON_JOB"
-        echo "Cronjob installed : $CRON_JOB"
-    else
-    echo "Cronjob Exists"
-  
-    fi
-    exit 0
 
 if [ ! -d "$BACKUP_DIR" ]; then
       mkdir -p "$BACKUP_DIR"
-      log.message "$BACKUP_DIR created"
+      log "$BACKUP_DIR created"
             exit 0
 fi
 
 
-tar -czf $BACKUP_DIR/backup_$DATE.tar.gz $SOURCE_DIR 2>> $LOG_FILE
+tar -czf $BACKUP_DIR/backup_"$DATE".tar.gz $SOURCE_DIR 2>> $LOG_FILE
 
 if [ $? -eq 0 ]; then
       log "Backup Complete : backup_$DATE.tar.gz"
@@ -45,9 +35,19 @@ if [ $? -eq 0 ]; then
 fi
 
 #Clear 7 day old backups
-find "$BACKUP_DIR" -type f -name "*.tar.gz -mtime +2 -delete
-log "Old backups cleaned up"
+find $BACKUP_DIR -type f -name "*.tar.gz" -mtime +2 -delete
+if [ $? -eq 0 ]; then
+	
+     log "Old backups cleaned up"
+else
+	log "Clean up failed"
 
-exit 0
+	exit 1
+fi
 
 
+if [ "$1" == "--install-cron" ]; then
+        (crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
+        log "Cronjob Installed : $CRON_JOB"
+        echo "Cronjob installed : $CRON_JOB"
+    fi
