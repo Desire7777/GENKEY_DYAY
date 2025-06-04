@@ -9,8 +9,8 @@ if ! command -v ansible &>/dev/null; then
 fi
 
 echo "Setting up QA Automation directory structure..."
-mkdir -p ~/ansible-test/{sub,QA_SNAPSHOTS,DB_BACKUPS}
-cd ~/ansible-test
+mkdir -p ~/{sub,QA_SNAPSHOTS,DB_BACKUPS}
+cd ~
 
 cat > qa_config <<EOF
 flavor=stage
